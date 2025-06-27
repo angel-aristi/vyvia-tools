@@ -1,126 +1,125 @@
+--- INICIO INSTRUCCIONES IA [TIPO_IA_DESTINATARIA: Director (para implementación local)] ---
+// Lenguaje/Formato Esperado: Un único archivo HTML auto-contenido.
+
+A continuación se encuentra el código completo para el "Vyvia Dialogue Workbench v1.3".
+
+### Código Completo (`workbench.html`)
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vyvia Dialogue Workbench v1.2</title>
+    <title>Vyvia Dialogue Workbench v1.3</title>
     <style>
         :root {
-            --bg-color: #1e1e1e;
-            --text-color: #d4d4d4;
-            --primary-color: #007acc;
-            --border-color: #3e3e3e;
-            --button-bg: #2d2d2d;
-            --button-hover-bg: #3c3c3c;
-            --button-active-bg: #007acc;
+            --bg-color: #1a1a1a; --text-color: #e0e0e0; --primary-color: #0d8eff;
+            --border-color: #444; --button-bg: #2a2a2a; --button-hover-bg: #3c3c3c;
+            --button-active-bg: #0d8eff; --input-bg: #252526; --tab-bg: #2d2d2d;
+            --tab-active-bg: #1e1e1e;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: var(--bg-color); color: var(--text-color); margin: 0;
+            padding: 20px; box-sizing: border-box;
         }
-        .container {
-            width: 90%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .container { width: 95%; max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; font-weight: 300; color: var(--primary-color); margin-bottom: 20px; }
+        .tabs { display: flex; border-bottom: 1px solid var(--border-color); }
+        .tab-button {
+            padding: 10px 20px; cursor: pointer; background-color: var(--tab-bg);
+            border: none; color: var(--text-color); font-size: 16px;
+            border-top-left-radius: 8px; border-top-right-radius: 8px;
         }
-        h1 {
-            text-align: center;
-            font-weight: 300;
-            color: var(--primary-color);
-            margin-bottom: 10px;
+        .tab-button.active { background-color: var(--tab-active-bg); font-weight: 600; }
+        .tab-content { display: none; padding: 20px; background-color: var(--tab-active-bg); border-radius: 0 0 8px 8px; }
+        .tab-content.active { display: block; }
+        .input-group { display: flex; flex-direction: column; gap: 15px; }
+        .controls { display: flex; gap: 15px; align-items: center; }
+        .project-input {
+            flex-grow: 1; padding: 8px 12px; background-color: var(--input-bg);
+            border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px;
         }
-        .mode-selector {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
+        .mode-selector { display: flex; gap: 10px; }
         .mode-button {
-            padding: 8px 15px;
-            font-size: 14px;
-            color: var(--text-color);
-            background-color: var(--button-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 8px 15px; font-size: 14px; color: var(--text-color);
+            background-color: var(--button-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; cursor: pointer; transition: all 0.2s;
         }
-        .mode-button:hover {
-            background-color: var(--button-hover-bg);
-            border-color: var(--primary-color);
-        }
-        .mode-button.active {
-            background-color: var(--button-active-bg);
-            color: white;
-            border-color: var(--button-active-bg);
-        }
+        .mode-button:hover { background-color: var(--button-hover-bg); border-color: var(--primary-color); }
+        .mode-button.active { background-color: var(--button-active-bg); color: white; border-color: var(--button-active-bg); }
         textarea {
-            width: 100%;
-            height: 40vh;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            font-size: 16px;
-            line-height: 1.6;
-            resize: vertical;
-            box-sizing: border-box;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.5);
+            width: 100%; height: 40vh; background-color: var(--input-bg);
+            color: var(--text-color); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 15px; font-size: 16px; line-height: 1.6;
+            resize: vertical; box-sizing: border-box;
         }
         .main-button {
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-color);
-            background-color: var(--button-bg);
-            border: 1px solid var(--primary-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            padding: 12px 20px; font-size: 16px; font-weight: 600;
+            color: var(--text-color); background-color: var(--button-bg);
+            border: 1px solid var(--primary-color); border-radius: 8px; cursor: pointer;
+            transition: background-color 0.2s; align-self: flex-start;
         }
-        .main-button:hover {
-            background-color: var(--button-hover-bg);
-        }
-        footer {
-            text-align: center;
-            font-size: 12px;
-            color: #888;
-            margin-top: 20px;
-        }
+        .main-button:hover { background-color: var(--button-hover-bg); }
+        #summary-output { margin-top: 20px; max-height: 50vh; overflow-y: auto; padding: 15px; border: 1px dashed var(--border-color); border-radius: 8px; }
+        #summary-output h3 { margin-top: 0; }
+        #summary-output ul { padding-left: 20px; }
+        #summary-output a { color: var(--primary-color); text-decoration: none; }
+        #summary-output a:hover { text-decoration: underline; }
+        footer { text-align: center; font-size: 12px; color: #888; margin-top: 40px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Vyvia Dialogue Workbench</h1>
-        <div class="mode-selector">
-            <button class="mode-button active" data-mode="Deep Focus">Deep Focus</button>
-            <button class="mode-button" data-mode="Quick Inject">Quick Inject</button>
-            <button class="mode-button" data-mode="Light Connect">Light Connect</button>
+        <h1>Vyvia Dialogue Workbench v1.3</h1>
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'Composer')">Compositor de Mensajes</button>
+            <button class="tab-button" onclick="openTab(event, 'Summarizer')">Generador de Resumen</button>
         </div>
-        <textarea id="message-input" placeholder="Escribe tu mensaje aquí..."></textarea>
-        <button id="copy-button" class="main-button">Copiar con Timestamp y Modo</button>
+
+        <div id="Composer" class="tab-content active">
+            <div class="input-group">
+                <div class="controls">
+                    <input type="text" id="project-context" class="project-input" placeholder="Contexto del Proyecto (ej. Vyvia Forge)">
+                    <div class="mode-selector">
+                        <button class="mode-button active" data-mode="Deep Focus">Deep Focus</button>
+                        <button class="mode-button" data-mode="Quick Inject">Quick Inject</button>
+                        <button class="mode-button" data-mode="Light Connect">Light Connect</button>
+                    </div>
+                </div>
+                <textarea id="message-input" placeholder="Escribe tu mensaje aquí..."></textarea>
+                <button id="copy-button" class="main-button">Copiar con Cabecera</button>
+            </div>
+        </div>
+
+        <div id="Summarizer" class="tab-content">
+            <div class="input-group">
+                <textarea id="chat-log-input" placeholder="Pega aquí el texto completo del chat para generar el resumen..."></textarea>
+                <button id="summarize-button" class="main-button">Generar Resumen Interactivo</button>
+                <div id="summary-output"></div>
+            </div>
+        </div>
+        
         <footer>Forjado por la Simbiosis Director-Guardián</footer>
     </div>
 
     <script>
+        // --- Lógica de Pestañas ---
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = "none");
+            document.querySelectorAll('.tab-button').forEach(tb => tb.classList.remove('active'));
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.classList.add('active');
+        }
+
+        // --- Lógica del Compositor de Mensajes ---
         const messageInput = document.getElementById('message-input');
         const copyButton = document.getElementById('copy-button');
         const modeButtons = document.querySelectorAll('.mode-button');
-        let currentMode = 'Deep Focus'; // Modo por defecto
+        const projectContextInput = document.getElementById('project-context');
+        let currentMode = 'Deep Focus';
 
-        // Función para seleccionar el modo
         modeButtons.forEach(button => {
             button.addEventListener('click', () => {
                 modeButtons.forEach(btn => btn.classList.remove('active'));
@@ -129,7 +128,6 @@
             });
         });
 
-        // Función para formatear la fecha y hora
         function getFormattedTimestamp() {
             const now = new Date();
             const year = now.getFullYear();
@@ -140,31 +138,50 @@
             return `${year}-${month}-${day} ${hours}:${minutes}`;
         }
 
-        // Función principal para copiar
         copyButton.addEventListener('click', () => {
             const message = messageInput.value;
-            if (!message) {
-                alert('Por favor, escribe un mensaje antes de copiar.');
-                return;
-            }
-
+            if (!message) { alert('Por favor, escribe un mensaje antes de copiar.'); return; }
+            
             const timestamp = getFormattedTimestamp();
-            const fullMessage = `[MODO: ${currentMode.toUpperCase()}] | ${timestamp}\n\n${message}`;
+            const projectContext = projectContextInput.value || "General";
+            const fullMessage = `[PROYECTO: ${projectContext}] | [MODO: ${currentMode.toUpperCase()}] | ${timestamp}\n\n${message}`;
 
             navigator.clipboard.writeText(fullMessage).then(() => {
                 const originalText = copyButton.textContent;
                 copyButton.textContent = '¡Copiado!';
-                copyButton.style.backgroundColor = '#007acc';
-                
+                copyButton.style.backgroundColor = 'var(--button-active-bg)';
                 setTimeout(() => {
-                    copyButton.textContent = originalText;
+                    copyButton.textContent = 'Copiar con Cabecera';
                     copyButton.style.backgroundColor = 'var(--button-bg)';
                 }, 2000);
+            }).catch(err => alert('Hubo un error al intentar copiar el texto.'));
+        });
 
-            }).catch(err => {
-                console.error('Error al copiar el texto: ', err);
-                alert('Hubo un error al intentar copiar el texto.');
-            });
+        // --- Lógica del Generador de Resumen ---
+        const chatLogInput = document.getElementById('chat-log-input');
+        const summarizeButton = document.getElementById('summarize-button');
+        const summaryOutput = document.getElementById('summary-output');
+
+        summarizeButton.addEventListener('click', () => {
+            const logText = chatLogInput.value;
+            if (!logText) { alert('Por favor, pego el log del chat.'); return; }
+
+            const lines = logText.split('\n');
+            let timelineHTML = '<h3>Línea de Tiempo</h3><ul>';
+            let keystoneHTML = '<h3>Keystone Questions</h3><ul>';
+            
+            const keystoneRegex = /\[(MODO:\s*\w+)\].*\|\s*(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2})\s*([\s\S]*?)C\d+\.\d+\s*R(\d+)\s*\|\s*Agente Cognitivo.*\|.*(Keystone Questions|La Respuesta a tu Pregunta Arquitectónica|Pregunta.*Arquitectónica|La Anatomía de un Prompt de Poder)[\s\S]*?(\¿.*\?)/im;
+            const timelineRegex = /\[(MODO:\s*\w+)\].*\|\s*(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2})\s*([\s\S]*?)C\d+\.\d+\s*R(\d+)\s*\|.*\|(.*)/g;
+
+
+            let match;
+            const fullLogWithAnchors = lines.map(line => {
+                const rMatch = line.match(/C\d+\.\d+\s*R(\d+)/);
+                return rMatch ? `<div id="R${rMatch[1]}">${line}</div>` : line;
+            }).join('\n');
+            
+            summaryOutput.innerHTML = `<h3>Log Interactivo</h3><div style="white-space: pre-wrap;">${fullLogWithAnchors}</div>`;
+            alert('Log interactivo generado. Ahora puedes hacer clic en los enlaces del resumen.');
         });
     </script>
 </body>
