@@ -60,7 +60,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Vyvia Dialogue Workbench v1.4</h1>
+        <h1>Vyvia Dialogue Workbench v1.4.1</h1>
         
         <div class="workbench-section">
             <div class="input-group">
@@ -138,7 +138,7 @@
             
             if (!chatSession) { alert('Por favor, especifica el número de sesión (ej. C9.1)'); return; }
 
-            const header = `[PROYECTO: ${projectContext}] | [MODO: ${currentMode.toUpperCase()}] | ${timestamp}`;
+            const header = `${chatSession} | [PROYECTO: ${projectContext}] | [MODO: ${currentMode.toUpperCase()}] | ${timestamp}`;
             const fullMessage = `${header}\n\n${message}`;
 
             navigator.clipboard.writeText(fullMessage).then(() => {
