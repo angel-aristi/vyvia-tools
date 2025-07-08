@@ -49,6 +49,10 @@
             transition: background-color 0.2s; align-self: flex-start;
         }
         .main-button:hover { background-color: var(--button-hover-bg); }
+
+        .directive-input-container  {
+            margin-bottom: -5px; /* Ajusta el espacio entre la directiva y el área de mensaje */
+        }
         
         /* --- ESTILOS PARA NOTAS RÁPIDAS (NUEVO) --- */
         #quick-notes-section { border-top: 1px solid var(--border-color); margin-top: 20px; padding-top: 20px;}
@@ -75,6 +79,9 @@
                         <button class="mode-button" data-mode="Quick Inject">Quick Inject</button>
                         <button class="mode-button" data-mode="Light Connect">Light Connect</button>
                     </div>
+                </div>
+                <div class="directive-input-container">
+                    <input type="text" id="protocol-directive-input" class="context-input" placeholder="Directiva de Protocolo (Opcional, ej. [CHALLENGE: PIM])">
                 </div>
                 <textarea id="message-input" placeholder="Escribe tu mensaje aquí..."></textarea>
                 <button id="copy-button" class="main-button">Copiar con Cabecera</button>
@@ -132,14 +139,24 @@
             const message = messageInput.value;
             if (!message) { alert('Por favor, escribe un mensaje antes de copiar.'); return; }
             
+            // Obtener todos los valores de los inputs
             const timestamp = getFormattedTimestamp();
             const projectContext = projectContextInput.value || "General";
-            const chatSession = chatSessionInput.value; // --- NUEVO ---
-            
+            const chatSession = chatSessionInput.value;
+            const protocolDirective = document.getElementById('protocol-directive-input').value.trim(); // <-- NUEVO
+
             if (!chatSession) { alert('Por favor, especifica el número de sesión (ej. C9.1)'); return; }
 
+            // Construir la cabecera y el mensaje final
             const header = `${chatSession} | [PROYECTO: ${projectContext}] | [MODO: ${currentMode.toUpperCase()}] | ${timestamp}`;
-            const fullMessage = `${header}\n\n${message}`;
+            let fullMessage;
+
+            // Condicionalmente añadir la directiva si existe
+            if (protocolDirective) {
+                fullMessage = `${header}\n${protocolDirective}\n\n${message}`;
+            } else {
+                fullMessage = `${header}\n\n${message}`;
+            }
 
             navigator.clipboard.writeText(fullMessage).then(() => {
                 showFeedback(copyButton, '¡Copiado!');
