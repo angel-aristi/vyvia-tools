@@ -45,11 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeData() {
         projects = loadData('vyvia_projects', ['BOT_TRADING', 'WORKBENCH_OS']);
-        directives = loadData('vyvia_directives', [
+        // Se asegura que las directivas por defecto tengan descripción.
+        const defaultDirectives = [
             { text: '[THINK: COGNITIVE_SWARM]', category: 'Modo Cognitivo', description: 'Sintetiza múltiples perspectivas para obtener sabiduría.' },
             { text: '[ENFORCE: GIT_BLOCK]', category: 'Control de Ejecución', description: 'Fuerza la inclusión de un bloque de commit de Git.' },
-            { text: '[NO_SUMMARIZE]', category: 'Formato de Salida', description: 'Suprime el resumen para una respuesta detallada.' }
-        ]);
+            { text: '[NO_SUMMARIZE]', category: 'Formato de Salida', description: 'Suprime el resumen para una respuesta detallada.' },
+            { text: '[USE_PLACEHOLDERS]', category: 'Formato de Salida', description: 'Emplea placeholders para datos sensibles o variables.' },
+            { text: '[ELABORATE]', category: 'Modo Cognitivo', description: 'Solicita una explicación más profunda y detallada.' }
+        ];
+        directives = loadData('vyvia_directives', defaultDirectives);
         categories = loadData('vyvia_directive_categories', ['Modo Cognitivo', 'Control de Ejecución', 'Formato de Salida']);
         
         saveData('vyvia_projects', projects);
@@ -130,11 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
             grouped[category].forEach(directive => {
                 const item = document.createElement('div');
                 item.className = 'directive-item';
+                item.title = directive.description || 'Sin descripción.';
                 item.dataset.category = directive.category;
                 if (activeDirectives.includes(directive.text)) {
                     item.classList.add('selected');
                 }
-                item.title = directive.description || 'Sin descripción.'; // Tooltip
                 item.addEventListener('click', () => {
                     const index = activeDirectives.indexOf(directive.text);
                     if (index > -1) {
@@ -217,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const text = elements.newDirectiveTextInput.value.trim();
             const category = elements.newDirectiveCategorySelector.value;
             if (text && category && !directives.some(d => d.text === text)) {
-                directives.push({ text, category, description: '' });
+                directives.push({ text, category, description: "" }); // Añadir con descripción vacía por ahora
                 saveData('vyvia_directives', directives);
                 renderDirectives();
                 elements.newDirectiveTextInput.value = '';
