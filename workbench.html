@@ -84,6 +84,43 @@
             margin-bottom: -5px; /* Ajusta el espacio entre la directiva y el área de mensaje */
         }
 
+ #active-directives-display { 
+     min-height: 38px; /* Altura similar a un input */ 
+     display: flex; 
+     flex-wrap: wrap; 
+     gap: 8px; 
+     align-items: center; 
+ } 
+ .active-directive-tag { 
+     display: inline-flex; 
+     align-items: center; 
+     background-color: var(--primary-color); 
+     color: white; 
+     padding: 4px 8px; 
+     border-radius: 15px; 
+     font-size: 13px; 
+     font-weight: 500; 
+ } 
+ .remove-directive-btn { 
+     background: none; 
+     border: none; 
+     color: white; 
+     margin-left: 8px; 
+     padding: 0; 
+     cursor: pointer; 
+     font-size: 16px; 
+     line-height: 1; 
+     opacity: 0.7; 
+ } 
+ .remove-directive-btn:hover { 
+     opacity: 1; 
+ } 
+ /* Estilo para la directiva seleccionada en el modal */ 
+ .directive-item.selected { 
+     background-color: var(--primary-color) !important; 
+     color: white !important; 
+ }
+
         #protocol-directive-input {
             width: 100%;
             box-sizing: border-box;
@@ -121,7 +158,7 @@
                     </div>
                 </div>
                 <div class="directive-input-container">
-                    <input type="text" id="protocol-directive-input" class="context-input" placeholder="Directiva de Protocolo (Opcional, ej. [CHALLENGE: PIM])">
+                    <div id="active-directives-display" class="context-input"></div>
                 </div>
                 <textarea id="message-input" placeholder="Escribe tu mensaje aquí..."></textarea>
                 <button id="copy-button" class="main-button">Copiar con Cabecera</button>
@@ -195,6 +232,31 @@
         const addDirectiveBtn = document.getElementById('add-directive-btn');
 
         let directives = [];
+        let activeDirectives = [];
+
+        function renderActiveDirectives() { 
+     const displayContainer = document.getElementById('active-directives-display'); 
+     displayContainer.innerHTML = ''; // Limpiar 
+     activeDirectives.forEach(directiveText => { 
+         const tag = document.createElement('div'); 
+         tag.className = 'active-directive-tag'; 
+         tag.textContent = directiveText; 
+ 
+         const removeBtn = document.createElement('button'); 
+         removeBtn.className = 'remove-directive-btn'; 
+         removeBtn.innerHTML = '×'; 
+         removeBtn.onclick = () => { 
+             const index = activeDirectives.indexOf(directiveText); 
+             if (index > -1) { 
+                 activeDirectives.splice(index, 1); 
+                 renderActiveDirectives(); // Actualizar UI 
+                 renderDirectives(); // Actualizar estado visual del modal 
+             } 
+         }; 
+         tag.appendChild(removeBtn); 
+         displayContainer.appendChild(tag); 
+     }); 
+ }
 
         function loadDirectives() {
             const storedDirectives = localStorage.getItem('vyvia_directives');
@@ -252,6 +314,21 @@
                     const directiveItem = document.createElement('div');
                     directiveItem.className = 'project-list-item'; // Reutilizamos estilo
 
+                    // Lógica de toggle para directivas activas 
+ if (activeDirectives.includes(directive.text)) { 
+     directiveItem.classList.add('selected'); 
+ } 
+ directiveItem.addEventListener('click', () => { 
+     const index = activeDirectives.indexOf(directive.text); 
+     if (index > -1) { 
+         activeDirectives.splice(index, 1); // Quitar si ya existe 
+     } else { 
+         activeDirectives.push(directive.text); // Añadir si no existe 
+     } 
+     renderActiveDirectives(); // Actualizar la UI principal 
+     renderDirectives(); // Re-renderizar el modal para actualizar el estado visual 
+ }); 
+
                     const textSpan = document.createElement('span');
                     textSpan.textContent = directive.text;
                     directiveItem.appendChild(textSpan);
@@ -286,6 +363,7 @@
             }
             renderProjects();
             loadDirectives(); // Cargar directivas al inicio
+            renderActiveDirectives();
         }
 
         function saveProjects() {
@@ -405,7 +483,7 @@
             const timestamp = getFormattedTimestamp();
             const projectContext = projectSelector.value || "General";
             const chatSession = chatSessionInput.value;
-            const protocolDirective = document.getElementById('protocol-directive-input').value.trim(); // <-- NUEVO
+            const protocolDirective = activeDirectives.join(' ');
 
             if (!chatSession) { alert('Por favor, especifica el número de sesión (ej. C9.1)'); return; }
 
@@ -419,6 +497,7 @@
             } else {
                 fullMessage = `${header}\n\n${message}`;
             }
+
 
             navigator.clipboard.writeText(fullMessage).then(() => {
                 showFeedback(copyButton, '¡Copiado!');
