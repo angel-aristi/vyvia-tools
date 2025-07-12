@@ -50,10 +50,11 @@
         .modal-content h2 { margin-top: 0; color: var(--primary-color); }
         .modal-close-btn { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         .project-list { list-style: none; padding: 0; margin: 20px 0; max-height: 400px; overflow-y: auto; } /* v2.2 - Altura de lista aumentada */
-        .project-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color); }
+        .project-list-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-bottom: 1px solid var(--border-color); border-radius: 15px; background-color: var(--button-bg); }
         .project-list-item:last-child { border-bottom: none; }
         .delete-project-btn { background: none; border: none; color: #ff4d4d; font-size: 18px; cursor: pointer; }
         .add-project-form { display: flex; gap: 10px; margin-top: 20px; }
+        .directive-category-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .add-project-form input { flex-grow: 1; }
         .add-project-btn { padding: 8px 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; }
         .mode-selector { display: flex; gap: 10px; }
@@ -246,10 +247,14 @@
                 directivesList.appendChild(categoryHeader);
 
                 const categoryContainer = document.createElement('div');
+                categoryContainer.className = 'directive-category-container';
                 groupedDirectives[category].forEach((directive, index) => {
                     const directiveItem = document.createElement('div');
                     directiveItem.className = 'project-list-item'; // Reutilizamos estilo
-                    directiveItem.textContent = directive.text;
+
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = directive.text;
+                    directiveItem.appendChild(textSpan);
 
                     const deleteBtn = document.createElement('button');
                     deleteBtn.className = 'delete-project-btn'; // Reutilizamos estilo
