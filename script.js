@@ -49,16 +49,19 @@ function renderActiveDirectives() {
     });
 }
 
-function renderCategorySelector() {
-    const selector = document.getElementById('new-directive-category-selector');
-    selector.innerHTML = '';
-    categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        selector.appendChild(option);
-    });
-}
+function renderCategorySelector() { 
+     const selector = document.getElementById('new-directive-category-selector'); 
+     // Asegurarse de que el elemento existe antes de manipularlo 
+     if (!selector) return; 
+ 
+     selector.innerHTML = ''; // Limpiar opciones 
+     categories.forEach(category => { 
+         const option = document.createElement('option'); 
+         option.value = category; 
+         option.textContent = category; 
+         selector.appendChild(option); 
+     }); 
+ }
 
 function loadDirectives() {
     const storedDirectives = localStorage.getItem('vyvia_directives');
@@ -156,22 +159,24 @@ manageDirectivesBtn.addEventListener('click', () => {
     renderDirectives();
 });
 directivesModalCloseBtn.addEventListener('click', () => directivesModal.style.display = 'none');
-addDirectiveBtn.addEventListener('click', () => {
-    const text = newDirectiveTextInput.value.trim();
-    const category = newDirectiveCategorySelector.value;
-    if (text && category) {
-        if (!directives.some(d => d.text === text)) {
-            directives.push({ text, category });
-            saveDirectives();
-            renderDirectives();
-            newDirectiveTextInput.value = '';
-        } else {
-            alert('Esa directiva ya existe.');
-        }
-    } else {
-        alert('El texto de la directiva no puede estar vacío.');
-    }
-});
+addDirectiveBtn.addEventListener('click', () => { 
+     const text = newDirectiveTextInput.value.trim(); 
+     const categorySelector = document.getElementById('new-directive-category-selector'); 
+     const category = categorySelector.value; 
+ 
+     if (text && category) { 
+         if (!directives.some(d => d.text === text)) { 
+             directives.push({ text, category, description: "" }); // Añadir con descripción vacía por ahora 
+             saveDirectives(); 
+             renderDirectives(); 
+             newDirectiveTextInput.value = ''; 
+         } else { 
+             alert('Esa directiva ya existe.'); 
+         } 
+     } else { 
+         alert('El texto de la directiva y la categoría son obligatorios.'); 
+     } 
+ });
 
 function renderProjects() {
     projectSelector.innerHTML = '';
