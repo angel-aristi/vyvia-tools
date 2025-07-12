@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vyvia Dialogue Workbench v1.5.1</title>
+        <title>Vyvia Dialogue Workbench v2.0</title>
     <style>
         :root {
             --bg-color: #1a1a1a; --text-color: #e0e0e0; --primary-color: #0d8eff;
@@ -26,7 +26,24 @@
             border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px;
         }
         #chat-session-input { flex-basis: 100px; } /* --- NUEVO --- */
-        #project-context-input { flex-grow: 1; } /* --- NUEVO --- */
+                #project-context-input { flex-grow: 1; } /* --- NUEVO --- */
+        #project-selector-container { display: flex; flex-grow: 1; gap: 10px; } /* --- v2.0 --- */
+        #project-selector { flex-grow: 1; } /* --- v2.0 --- */
+        .manage-button { padding: 8px 12px; font-size: 13px; background-color: var(--button-bg); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.2s; } /* --- v2.0 --- */
+        .manage-button:hover { background-color: var(--button-hover-bg); border-color: var(--primary-color); } /* --- v2.0 --- */
+
+        /* --- ESTILOS MODAL v2.0 --- */
+        .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+        .modal-content { background-color: #2a2a2a; margin: auto; padding: 25px; border: 1px solid var(--border-color); border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; } 
+        .modal-content h2 { margin-top: 0; color: var(--primary-color); }
+        .modal-close-btn { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .project-list { list-style: none; padding: 0; margin: 20px 0; max-height: 200px; overflow-y: auto; }
+        .project-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color); }
+        .project-list-item:last-child { border-bottom: none; }
+        .delete-project-btn { background: none; border: none; color: #ff4d4d; font-size: 18px; cursor: pointer; }
+        .add-project-form { display: flex; gap: 10px; margin-top: 20px; }
+        .add-project-form input { flex-grow: 1; }
+        .add-project-btn { padding: 8px 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; }
         .mode-selector { display: flex; gap: 10px; }
         .mode-button {
             padding: 8px 15px; font-size: 14px; color: var(--text-color);
@@ -69,15 +86,19 @@
 </head>
 <body>
     <div class="container">
-        <h1>Vyvia Dialogue Workbench v1.5.1</h1>
+                <h1>Vyvia Dialogue Workbench v2.0</h1>
         
         <div class="workbench-section">
             <div class="input-group">
                 <div class="controls">
                     <!-- --- MODIFICADO: Inputs de Contexto --- -->
+                    <!-- --- MODIFICADO v2.0: Gestión de Proyectos --- -->
                     <div class="context-inputs">
                         <input type="text" id="chat-session-input" class="context-input" placeholder="Sesión (ej. C9.1)">
-                        <input type="text" id="project-context-input" class="context-input" placeholder="Contexto del Proyecto (ej. Vyvia Forge)">
+                        <div id="project-selector-container" class="context-input">
+                            <select id="project-selector" class="context-input" style="border: none; padding-left: 0;"></select>
+                        </div>
+                        <button id="manage-projects-btn" class="manage-button">Gestionar</button>
                     </div>
                     <div class="mode-selector">
                         <button class="mode-button active" data-mode="Deep Focus">Deep Focus</button>
@@ -100,17 +121,115 @@
             </div>
         </div>
 
+        <!-- --- MODAL GESTIÓN DE PROYECTOS v2.0 --- -->
+        <div id="project-modal" class="modal-overlay">
+            <div class="modal-content">
+                <span id="modal-close-btn" class="modal-close-btn">&times;</span>
+                <h2>Gestionar Proyectos</h2>
+                <ul id="project-list" class="project-list"></ul>
+                <div class="add-project-form">
+                    <input type="text" id="new-project-input" class="context-input" placeholder="Nombre del nuevo proyecto">
+                    <button id="add-project-btn" class="add-project-btn">+</button>
+                </div>
+            </div>
+        </div>
+
         <footer>Forjado por la Simbiosis Director-Guardián</footer>
     </div>
 
     <script>
         // --- Lógica del Compositor de Mensajes ---
+        // --- Lógica del Compositor de Mensajes ---
         const messageInput = document.getElementById('message-input');
         const copyButton = document.getElementById('copy-button');
         const modeButtons = document.querySelectorAll('.mode-button');
-        const projectContextInput = document.getElementById('project-context-input');
-        const chatSessionInput = document.getElementById('chat-session-input'); // --- NUEVO ---
+        const chatSessionInput = document.getElementById('chat-session-input');
         let currentMode = 'Deep Focus';
+
+        // --- INICIO LÓGICA GESTIÓN DE PROYECTOS v2.0 ---
+        const projectSelector = document.getElementById('project-selector');
+        const manageProjectsBtn = document.getElementById('manage-projects-btn');
+        const projectModal = document.getElementById('project-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const projectList = document.getElementById('project-list');
+        const newProjectInput = document.getElementById('new-project-input');
+        const addProjectBtn = document.getElementById('add-project-btn');
+
+        let projects = [];
+
+        function loadProjects() {
+            const storedProjects = localStorage.getItem('vyvia_projects');
+            if (storedProjects) {
+                projects = JSON.parse(storedProjects);
+            } else {
+                projects = ['BOT_TRADING', 'WORKBENCH_OS'];
+                saveProjects();
+            }
+            renderProjects();
+        }
+
+        function saveProjects() {
+            localStorage.setItem('vyvia_projects', JSON.stringify(projects));
+        }
+
+        function renderProjects() {
+            // Limpiar listas
+            projectSelector.innerHTML = '';
+            projectList.innerHTML = '';
+
+            // Poblar <select> y lista del modal
+            projects.forEach((project, index) => {
+                // Opción para el select
+                const option = document.createElement('option');
+                option.value = project;
+                option.textContent = project;
+                projectSelector.appendChild(option);
+
+                // Item para la lista del modal
+                const listItem = document.createElement('li');
+                listItem.className = 'project-list-item';
+                listItem.textContent = project;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-project-btn';
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.onclick = () => {
+                    projects.splice(index, 1);
+                    saveProjects();
+                    renderProjects();
+                };
+
+                listItem.appendChild(deleteBtn);
+                projectList.appendChild(listItem);
+            });
+        }
+
+        function addNewProject() {
+            const newProjectName = newProjectInput.value.trim().toUpperCase();
+            if (newProjectName && !projects.includes(newProjectName)) {
+                projects.push(newProjectName);
+                saveProjects();
+                renderProjects();
+                newProjectInput.value = '';
+            }
+        }
+
+        // Event Listeners del modal
+        manageProjectsBtn.addEventListener('click', () => { projectModal.style.display = 'flex'; });
+        modalCloseBtn.addEventListener('click', () => { projectModal.style.display = 'none'; });
+        window.addEventListener('click', (event) => {
+            if (event.target === projectModal) {
+                projectModal.style.display = 'none';
+            }
+        });
+        addProjectBtn.addEventListener('click', addNewProject);
+        newProjectInput.addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') addNewProject(); 
+        });
+
+        // Carga inicial
+        document.addEventListener('DOMContentLoaded', loadProjects);
+        // --- FIN LÓGICA GESTIÓN DE PROYECTOS v2.0 ---
 
         modeButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -146,7 +265,7 @@
             
             // Obtener todos los valores de los inputs
             const timestamp = getFormattedTimestamp();
-            const projectContext = projectContextInput.value || "General";
+            const projectContext = projectSelector.value || "General";
             const chatSession = chatSessionInput.value;
             const protocolDirective = document.getElementById('protocol-directive-input').value.trim(); // <-- NUEVO
 
