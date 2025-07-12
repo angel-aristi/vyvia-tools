@@ -29,7 +29,7 @@
                 #project-context-input { flex-grow: 1; } /* --- NUEVO --- */
         #project-selector-container { display: flex; flex-grow: 1; gap: 10px; } /* --- v2.0 --- */
         #project-selector { flex-grow: 1; } /* --- v2.0 --- */
-        .manage-button { padding: 8px 12px; font-size: 13px; background-color: var(--button-bg); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.2s; } /* --- v2.0 --- */
+        .manage-button { padding: 8px 12px; font-size: 13px; background-color: var(--button-bg); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: all 0.2s; color: var(--text-color); } /* --- v2.0 --- */
         .manage-button:hover { background-color: var(--button-hover-bg); border-color: var(--primary-color); } /* --- v2.0 --- */
 
         /* --- ESTILOS MODAL v2.0 --- */
@@ -91,15 +91,24 @@
      gap: 8px; 
      align-items: center; 
  } 
- .active-directive-tag { 
-     display: inline-flex; 
-     align-items: center; 
-     background-color: var(--primary-color); 
-     color: white; 
-     padding: 4px 8px; 
-     border-radius: 15px; 
-     font-size: 13px; 
-     font-weight: 500; 
+ .directive-item {
+     display: inline-flex;
+     align-items: center;
+     padding: 5px 10px;
+     border: 1px solid var(--border-color);
+     border-radius: 15px; /* <-- Clave para redondear */
+     cursor: pointer;
+     transition: all 0.2s;
+ }
+
+ .active-directive-tag {
+     display: inline-flex;
+     align-items: center;
+     padding: 5px 10px;
+     border: 1px solid var(--border-color);
+     border-radius: 15px;
+     font-size: 13px;
+     font-weight: 500;
  } 
  .remove-directive-btn { 
      background: none; 
@@ -244,8 +253,12 @@
      const displayContainer = document.getElementById('active-directives-display'); 
      displayContainer.innerHTML = ''; // Limpiar 
      activeDirectives.forEach(directiveText => { 
-         const tag = document.createElement('div'); 
-         tag.className = 'active-directive-tag'; 
+         const tag = document.createElement('div');
+         tag.className = 'active-directive-tag';
+         const directiveData = directives.find(d => d.text === directiveText);
+         if (directiveData) {
+            tag.dataset.category = directiveData.category;
+         }
          tag.textContent = directiveText; 
  
          const removeBtn = document.createElement('button'); 
@@ -265,32 +278,30 @@
      }); 
  }
 
-        function renderCategorySelector() { 
-     const selector = document.getElementById('new-directive-category-selector'); 
-     const newCategoryInput = document.getElementById('new-category-input'); 
-     selector.innerHTML = ''; 
- 
-     const uniqueCategories = [...new Set(directives.map(d => d.category))]; 
-     uniqueCategories.forEach(category => { 
-         const option = document.createElement('option'); 
-         option.value = category; 
-         option.textContent = category; 
-         selector.appendChild(option); 
-     }); 
- 
-     const addNewOption = document.createElement('option'); 
-     addNewOption.value = '__add_new__'; 
-     addNewOption.textContent = '--- Añadir Nueva Categoría ---'; 
-     selector.appendChild(addNewOption); 
- 
-     selector.onchange = () => { 
-         if (selector.value === '__add_new__') { 
-             newCategoryInput.style.display = 'block'; 
-         } else { 
-             newCategoryInput.style.display = 'none'; 
-         } 
-     }; 
- } 
+function renderCategorySelector() {
+     const selector = document.getElementById('new-directive-category-selector');
+     const newCategoryInput = document.getElementById('new-category-input');
+     selector.innerHTML = '';
+
+     const uniqueCategories = [...new Set(directives.map(d => d.category))];
+     uniqueCategories.forEach(category => {
+         const option = document.createElement('option');
+         option.value = category;
+         option.textContent = category;
+         selector.appendChild(option);
+     });
+
+     const addNewOption = document.createElement('option');
+     addNewOption.value = '__add_new__';
+     addNewOption.textContent = '--- Añadir Nueva Categoría ---';
+     selector.appendChild(addNewOption);
+
+     selector.onchange = () => {
+         newCategoryInput.style.display = (selector.value === '__add_new__') ? 'block' : 'none';
+     };
+     // Disparar el evento una vez para establecer el estado inicial correcto
+     selector.onchange();
+}
 
         function loadDirectives() {
             const storedDirectives = localStorage.getItem('vyvia_directives');
@@ -417,26 +428,31 @@
             renderDirectives();
         });
         directivesModalCloseBtn.addEventListener('click', () => directivesModal.style.display = 'none');
-        addDirectiveBtn.addEventListener('click', () => { 
-     const text = newDirectiveTextInput.value.trim(); 
-     const categorySelector = document.getElementById('new-directive-category-selector'); 
-     const newCategoryInput = document.getElementById('new-category-input'); 
-     let category = (categorySelector.value === '__add_new__') 
-                     ? newCategoryInput.value.trim() 
-                     : categorySelector.value; 
- 
-     if (text && category) { 
-         directives.push({ text, category, description: '' }); // Añadir con descripción vacía por ahora 
-         saveDirectives(); 
-         renderDirectives(); 
-         renderCategorySelector(); // Actualizar el selector 
-         
-         newDirectiveTextInput.value = ''; 
-         newCategoryInput.value = ''; 
-         newCategoryInput.style.display = 'none'; 
-         categorySelector.value = category; 
-     } 
- });
+addDirectiveBtn.addEventListener('click', () => {
+    const text = newDirectiveTextInput.value.trim();
+    const categorySelector = document.getElementById('new-directive-category-selector');
+    const newCategoryInput = document.getElementById('new-category-input');
+    
+    let category = (categorySelector.value === '__add_new__')
+                   ? newCategoryInput.value.trim()
+                   : categorySelector.value;
+
+    if (text && category && !directives.some(d => d.text === text)) {
+        directives.push({ text, category, description: "" });
+        saveDirectives();
+        renderDirectives();
+        renderCategorySelector();
+        
+        newDirectiveTextInput.value = '';
+        newCategoryInput.value = '';
+        newCategoryInput.style.display = 'none';
+        categorySelector.value = category;
+    } else if (!text || !category) {
+        alert('Tanto el texto como la categoría son obligatorios.');
+    } else {
+        alert('Esa directiva ya existe.');
+    }
+});
 
         function renderProjects() {
             // Limpiar listas
