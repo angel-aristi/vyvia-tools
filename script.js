@@ -247,9 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Cierre de modales al hacer clic en el overlay
         [elements.projectModal, elements.directivesModal, elements.categoriesModal].forEach(modal => {
             modal.addEventListener('click', (event) => {
-                // Cierra el modal solo si el clic es directamente en el overlay y no en un hijo
+                // Se cierra el modal SOLO si el clic fue directamente en el fondo del overlay
                 if (event.target === modal) {
                     modal.style.display = 'none';
                 }
