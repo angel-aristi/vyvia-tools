@@ -528,7 +528,7 @@ addDirectiveBtn.addEventListener('click', () => {
             if (!chatSession) { alert('Por favor, especifica el número de sesión (ej. C9.1)'); return; }
 
             // Construir la cabecera y el mensaje final
-            const header = `${chatSession} | [PROYECTO: ${projectContext}] | [MODO: DEEP FOCUS] | ${timestamp}`;
+            const header = `${chatSession} | [PROYECTO: ${projectContext}] | ${timestamp}`;
             let fullMessage;
 
             // Condicionalmente añadir la directiva si existe
