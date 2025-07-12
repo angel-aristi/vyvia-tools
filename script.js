@@ -73,7 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const listItem = document.createElement('li');
             listItem.className = 'list-item';
-            listItem.innerHTML = `<span>${project}</span>`;
+            listItem.dataset.index = index;
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = project;
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-btn';
+            editBtn.innerHTML = '✎'; // Pencil icon
+            editBtn.onclick = () => handleEdit(listItem, 'projects', index, textSpan, project);
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
             deleteBtn.innerHTML = '×';
@@ -82,7 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveData('vyvia_projects', projects);
                 renderProjects();
             };
-            listItem.appendChild(deleteBtn);
+            
+            listItem.appendChild(textSpan);
+            const btnContainer = document.createElement('div');
+            btnContainer.appendChild(editBtn);
+            btnContainer.appendChild(deleteBtn);
+            listItem.appendChild(btnContainer);
+            
             elements.projectList.appendChild(listItem);
         });
     }
@@ -92,7 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
         categories.forEach((category, index) => {
             const listItem = document.createElement('li');
             listItem.className = 'list-item';
-            listItem.innerHTML = `<span>${category}</span>`;
+            listItem.dataset.index = index;
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = category;
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-btn';
+            editBtn.innerHTML = '✎';
+            editBtn.onclick = () => handleEdit(listItem, 'categories', index, textSpan, category);
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
             deleteBtn.innerHTML = '×';
@@ -102,7 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderCategories();
                 renderCategorySelector();
             };
-            listItem.appendChild(deleteBtn);
+
+            listItem.appendChild(textSpan);
+            const btnContainer = document.createElement('div');
+            btnContainer.appendChild(editBtn);
+            btnContainer.appendChild(deleteBtn);
+            listItem.appendChild(btnContainer);
             elements.categoryList.appendChild(listItem);
         });
     }
@@ -149,19 +178,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderActiveDirectives();
                     renderDirectives();
                 });
-                item.innerHTML = `<span>${directive.text}</span>`;
+                const textSpan = document.createElement('span');
+                textSpan.textContent = directive.text;
+                item.appendChild(textSpan);
+
+                const btnContainer = document.createElement('div');
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.innerHTML = '✎';
+                editBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    // We pass the parent `item` to handleEdit because it contains the click logic
+                    handleEdit(item, 'directives', null, textSpan, directive, 'text');
+                };
+
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.innerHTML = '×';
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
-                    directives = directives.filter(d => d.text !== directive.text);
-                    activeDirectives = activeDirectives.filter(t => t !== directive.text);
-                    saveData('vyvia_directives', directives);
-                    renderDirectives();
-                    renderActiveDirectives();
+                    const directiveIndex = directives.findIndex(d => d.text === directive.text);
+                    if (directiveIndex > -1) {
+                        directives.splice(directiveIndex, 1);
+                        activeDirectives = activeDirectives.filter(t => t !== directive.text);
+                        saveData('vyvia_directives', directives);
+                        renderDirectives();
+                        renderActiveDirectives();
+                    }
                 };
-                item.appendChild(deleteBtn);
+
+                btnContainer.appendChild(editBtn);
+                btnContainer.appendChild(deleteBtn);
+                item.appendChild(btnContainer);
                 container.appendChild(item);
             });
             elements.directivesList.appendChild(container);
@@ -270,6 +319,98 @@ document.addEventListener('DOMContentLoaded', () => {
             element.textContent = originalText;
             element.style.backgroundColor = '';
         }, 1500);
+    }
+
+    function handleEdit(listItem, type, index, textSpan, originalData, field = null) {
+        const currentText = field ? originalData[field] : originalData;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentText;
+
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'edit-btn'; // Re-use style
+        saveBtn.innerHTML = '✓'; // Checkmark icon
+
+        // Replace span with input
+        listItem.replaceChild(input, textSpan);
+        input.focus();
+
+        // Temporarily disable the main item click for directives
+        if (type === 'directives') {
+            listItem.style.pointerEvents = 'none';
+        }
+
+        const save = () => {
+            const newValue = input.value.trim();
+            if (newValue && newValue !== currentText) {
+                switch(type) {
+                    case 'projects':
+                        projects[index] = newValue.toUpperCase();
+                        saveData('vyvia_projects', projects);
+                        renderProjects();
+                        break;
+                    case 'categories':
+                        categories[index] = newValue;
+                        saveData('vyvia_directive_categories', categories);
+                        renderCategories();
+                        renderCategorySelector();
+                        break;
+                    case 'directives':
+                        originalData[field] = newValue;
+                        saveData('vyvia_directives', directives);
+                        renderDirectives();
+                        renderActiveDirectives(); // In case the edited one was active
+                        break;
+                }
+            } else {
+                // Restore original state if no change or empty
+                listItem.replaceChild(textSpan, input);
+                if (type === 'directives') {
+                    listItem.style.pointerEvents = 'auto';
+                }
+            }
+        };
+
+        saveBtn.onclick = (e) => {
+             e.stopPropagation();
+             save();
+        };
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                save();
+            } else if (e.key === 'Escape') {
+                listItem.replaceChild(textSpan, input);
+                if (type === 'directives') {
+                    listItem.style.pointerEvents = 'auto';
+                }
+            }
+        });
+
+        // Replace the whole button container if we are not in a directive
+        const btnContainer = listItem.querySelector('div');
+        const originalButtons = btnContainer.innerHTML;
+        btnContainer.innerHTML = '';
+        btnContainer.appendChild(saveBtn);
+
+        // Restore on blur if not saved
+        input.addEventListener('blur', () => {
+            // Use a small delay to allow the save button click to register
+            setTimeout(() => {
+                if (document.activeElement !== saveBtn) {
+                     listItem.replaceChild(textSpan, input);
+                     btnContainer.innerHTML = originalButtons;
+                      // Re-attach listeners for the restored buttons
+                     if (type === 'projects') renderProjects();
+                     else if (type === 'categories') renderCategories();
+                     else if (type === 'directives') {
+                         renderDirectives();
+                         listItem.style.pointerEvents = 'auto';
+                     }
+                }
+            }, 200);
+        });
     }
 
     // --- 6. Initial Load ---
