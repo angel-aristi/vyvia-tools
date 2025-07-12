@@ -3,35 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vyvia Dialogue Workbench v3.0 (Modular)</title>
+    <title>Vyvia Dialogue Workbench v2.2</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Vyvia Dialogue Workbench v2.1</h1>
+        <h1>Vyvia Dialogue Workbench v2.2</h1>
         
         <div class="workbench-section">
             <div class="input-group">
                 <div class="controls">
                     <div class="context-inputs">
-                        <input type="text" id="chat-session-input" class="context-input" placeholder="Sesión (ej. C9.1)">
-                        <div id="project-selector-container" class="context-input">
-                            <select id="project-selector" class="context-input" style="border: none; padding-left: 0;"></select>
-                        </div>
+                        <input type="text" id="chat-session-input" class="context-input" placeholder="Sesión">
+                        <select id="project-selector" class="context-input"></select>
                         <button id="manage-projects-btn" class="manage-button">Proyectos</button>
                         <button id="manage-directives-btn" class="manage-button">Directivas</button>
                     </div>
                 </div>
-                <div class="directive-input-container">
-                    <div id="active-directives-display" class="context-input"></div>
-                </div>
+                <div id="active-directives-display" class="context-input"></div>
                 <textarea id="message-input" placeholder="Escribe tu mensaje aquí..."></textarea>
                 <button id="copy-button" class="main-button">Copiar con Cabecera</button>
 
                 <div id="quick-notes-section">
                      <h3>Captura Rápida de Ideas</h3>
                      <textarea id="notes-input" placeholder="Escribe aquí una nota rápida..."></textarea>
-                     <button id="copy-note-button" class="main-button" style="font-size: 14px; padding: 8px 15px;">Copiar Nota al Portapapeles</button>
+                     <button id="copy-note-button" class="main-button">Copiar Nota</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="project-modal" class="modal-overlay">
+            <div class="modal-content">
+                <span id="project-modal-close-btn" class="modal-close-btn">×</span>
+                <h2>Gestionar Proyectos</h2>
+                <ul id="project-list" class="item-list"></ul>
+                <div class="add-form">
+                    <input type="text" id="new-project-input" class="context-input" placeholder="Nombre del nuevo proyecto">
+                    <button id="add-project-btn" class="add-btn">+</button>
                 </div>
             </div>
         </div>
@@ -39,41 +48,29 @@
         <div id="directives-modal" class="modal-overlay">
             <div class="modal-content">
                 <span id="directives-modal-close-btn" class="modal-close-btn">×</span>
-                <h2>Gestionar Directivas de Protocolo</h2>
-                <button id="manage-categories-btn" class="manage-button">Gestionar Categorías</button>
-                <div id="directives-list" class="project-list"></div>
-                <div class="add-project-form">
+                <h2>Gestionar Directivas
+                    <button id="manage-categories-btn" class="manage-button" style="float: right;">Categorías</button>
+                </h2>
+                <div id="directives-list" class="item-list"></div>
+                <div class="add-form">
                     <input type="text" id="new-directive-text-input" class="context-input" placeholder="Texto de la directiva, ej. [INFO: ...]" style="flex-grow: 3;">
                     <select id="new-directive-category-selector" class="context-input" style="flex-grow: 1;"></select>
-                    <button id="add-directive-btn" class="add-project-btn">+</button>
+                    <button id="add-directive-btn" class="add-btn">+</button>
                 </div>
             </div>
         </div>
-
-        <div id="project-modal" class="modal-overlay">
+        
+        <div id="categories-modal" class="modal-overlay">
             <div class="modal-content">
-                <span id="modal-close-btn" class="modal-close-btn">×</span>
-                <h2>Gestionar Proyectos</h2>
-                <ul id="project-list" class="project-list"></ul>
-                <div class="add-project-form">
-                    <input type="text" id="new-project-input" class="context-input" placeholder="Nombre del nuevo proyecto">
-                    <button id="add-project-btn" class="add-project-btn">+</button>
+                <span id="categories-modal-close-btn" class="modal-close-btn">×</span>
+                <h2>Gestionar Categorías</h2>
+                <ul id="category-list" class="item-list"></ul>
+                <div class="add-form">
+                    <input type="text" id="new-category-input-modal" class="context-input" placeholder="Nombre de la nueva categoría">
+                    <button id="add-category-btn-modal" class="add-btn">+</button>
                 </div>
             </div>
         </div>
-
-        <!-- --- MODAL GESTIÓN DE CATEGORÍAS v2.2 --- --> 
- <div id="categories-modal" class="modal-overlay"> 
-     <div class="modal-content"> 
-         <span id="categories-modal-close-btn" class="modal-close-btn">×</span> 
-         <h2>Gestionar Categorías</h2> 
-         <ul id="category-list" class="project-list"></ul> 
-         <div class="add-project-form"> 
-             <input type="text" id="new-category-input-modal" class="context-input" placeholder="Nombre de la nueva categoría"> 
-             <button id="add-category-btn-modal" class="add-project-btn">+</button> 
-         </div> 
-     </div> 
- </div>
 
         <footer>Forjado por la Simbiosis Director-Guardián</footer>
     </div>
