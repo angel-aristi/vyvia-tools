@@ -115,15 +115,16 @@
  .remove-directive-btn:hover { 
      opacity: 1; 
  } 
- /* Estilo para la directiva seleccionada en el modal */ 
- .directive-item.selected { 
-     background-color: var(--primary-color) !important; 
-     color: white !important; 
-     border-color: var(--primary-color) !important; 
- } 
- .directive-item.selected .delete-project-btn { 
-     color: white !important; 
- }
+/* Paleta de Colores por Categoría v1.0 */
+.directive-item[data-category="Modo Cognitivo"] { background-color: #3a2e5c; border-color: #5c4a91; }
+.directive-item[data-category="Control de Ejecución"] { background-color: #5e4925; border-color: #a37d3b; }
+.directive-item[data-category="Formato de Salida"] { background-color: #26555e; border-color: #3b8a99; }
+
+/* Estilo para el estado seleccionado (más sutil) */
+.directive-item.selected {
+    box-shadow: 0 0 0 2px var(--primary-color);
+    /* Se elimina el cambio de color de fondo para mantener el color de la categoría */
+}
 
         #protocol-directive-input {
             width: 100%;
@@ -345,6 +346,7 @@
                 categoryContainer.className = 'directive-category-container';
                 groupedDirectives[category].forEach((directive) => {
                     const directiveItem = document.createElement('div');
+                    directiveItem.dataset.category = category;
                     directiveItem.className = 'directive-item';
 
                     if (activeDirectives.includes(directive.text)) {
@@ -419,19 +421,16 @@
      const text = newDirectiveTextInput.value.trim(); 
      const categorySelector = document.getElementById('new-directive-category-selector'); 
      const newCategoryInput = document.getElementById('new-category-input'); 
-     let category = ''; 
- 
-     if (categorySelector.value === '__add_new__') { 
-         category = newCategoryInput.value.trim(); 
-     } else { 
-         category = categorySelector.value; 
-     } 
+     let category = (categorySelector.value === '__add_new__') 
+                     ? newCategoryInput.value.trim() 
+                     : categorySelector.value; 
  
      if (text && category) { 
-         directives.push({ text, category, description: '' }); 
+         directives.push({ text, category, description: '' }); // Añadir con descripción vacía por ahora 
          saveDirectives(); 
          renderDirectives(); 
-         renderCategorySelector(); 
+         renderCategorySelector(); // Actualizar el selector 
+         
          newDirectiveTextInput.value = ''; 
          newCategoryInput.value = ''; 
          newCategoryInput.style.display = 'none'; 
