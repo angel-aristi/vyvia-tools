@@ -65,7 +65,7 @@ textarea { width: 100%; background-color: var(--input-bg); color: var(--text-col
 
 /* --- Modal Genérico --- */
 .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-.modal-content { display: flex; flex-direction: column; background-color: #2a2a2a; padding: 25px; border: 1px solid var(--border-color); border-radius: 10px; width: 90%; max-width: 700px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); resize: both; overflow: auto; min-height: 300px; min-width: 400px;}
+.modal-content { display: flex; flex-direction: column; background-color: #2a2a2a; padding: 25px; border: 1px solid var(--border-color); border-radius: 10px; width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); resize: both; overflow: auto; min-height: 300px; min-width: 400px;}
 .modal-content h2 { margin-top: 0; color: var(--primary-color); }
 .modal-close-btn { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
 .item-list { list-style: none; padding: 0; margin: 20px 0; overflow-y: auto; flex-grow: 1; }

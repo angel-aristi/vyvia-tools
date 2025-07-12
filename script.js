@@ -248,8 +248,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         [elements.projectModal, elements.directivesModal, elements.categoriesModal].forEach(modal => {
-            window.addEventListener('click', (event) => {
-                if (event.target === modal) modal.style.display = 'none';
+            modal.addEventListener('click', (event) => {
+                // Cierra el modal solo si el clic es directamente en el overlay y no en un hijo
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
             });
         });
     }
