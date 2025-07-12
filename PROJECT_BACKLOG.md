@@ -18,6 +18,7 @@ Las directivas no son comandos estáticos, sino la sintaxis de un lenguaje de co
   - **Gestión de Contexto Automatizada** (ejecución de `pack_context.py` con un clic).
   - **Terminal Integrada** (ejecución de comandos `git`).
   - **Orquestación Directa de Agentes Externos** (IA Codificadora).
+    - **Captura de Notas Persistente:** La sección "Captura Rápida de Ideas" evoluciona. En lugar de copiar al portapapeles, permitirá al Director seleccionar un archivo de destino (ej. `PROJECT_VISION_LOG.md`, `IDEAS.md`) y añadirá la nota directamente al final de ese archivo en el sistema local.
 
 
 
