@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Vyvia Dialogue Workbench v2.0</title>
+        <title>Vyvia Dialogue Workbench v2.1</title>
     <style>
         :root {
             --bg-color: #1a1a1a; --text-color: #e0e0e0; --primary-color: #0d8eff;
@@ -86,7 +86,7 @@
 </head>
 <body>
     <div class="container">
-                <h1>Vyvia Dialogue Workbench v2.0</h1>
+                <h1>Vyvia Dialogue Workbench v2.1</h1>
         
         <div class="workbench-section">
             <div class="input-group">
@@ -98,7 +98,8 @@
                         <div id="project-selector-container" class="context-input">
                             <select id="project-selector" class="context-input" style="border: none; padding-left: 0;"></select>
                         </div>
-                        <button id="manage-projects-btn" class="manage-button">Gestionar</button>
+                        <button id="manage-projects-btn" class="manage-button">Proyectos</button>
+                        <button id="manage-directives-btn" class="manage-button">Directivas</button>
                     </div>
                     <div class="mode-selector">
                         <button class="mode-button active" data-mode="Deep Focus">Deep Focus</button>
@@ -122,6 +123,20 @@
         </div>
 
         <!-- --- MODAL GESTIÓN DE PROYECTOS v2.0 --- -->
+                <!-- --- MODAL GESTIÓN DE DIRECTIVAS v2.1 --- -->
+        <div id="directives-modal" class="modal-overlay">
+            <div class="modal-content">
+                <span id="directives-modal-close-btn" class="modal-close-btn">&times;</span>
+                <h2>Gestionar Directivas de Protocolo</h2>
+                <div id="directives-list" class="project-list"></div> <!-- Reutilizamos la clase .project-list para la lista de directivas -->
+                <div class="add-project-form">
+                    <input type="text" id="new-directive-text-input" class="context-input" placeholder="Texto de la directiva, ej. [INFO: ...]" style="flex-grow: 3;">
+                    <input type="text" id="new-directive-category-input" class="context-input" placeholder="Categoría" style="flex-grow: 1;">
+                    <button id="add-directive-btn" class="add-project-btn">+</button>
+                </div>
+            </div>
+        </div>
+
         <div id="project-modal" class="modal-overlay">
             <div class="modal-content">
                 <span id="modal-close-btn" class="modal-close-btn">&times;</span>
@@ -157,6 +172,93 @@
 
         let projects = [];
 
+        // --- INICIO LÓGICA GESTIÓN DE DIRECTIVAS v2.1 ---
+        const manageDirectivesBtn = document.getElementById('manage-directives-btn');
+        const directivesModal = document.getElementById('directives-modal');
+        const directivesModalCloseBtn = document.getElementById('directives-modal-close-btn');
+        const directivesList = document.getElementById('directives-list');
+        const newDirectiveTextInput = document.getElementById('new-directive-text-input');
+        const newDirectiveCategoryInput = document.getElementById('new-directive-category-input');
+        const addDirectiveBtn = document.getElementById('add-directive-btn');
+
+        let directives = [];
+
+        function loadDirectives() {
+            const storedDirectives = localStorage.getItem('vyvia_directives');
+            if (storedDirectives) {
+                directives = JSON.parse(storedDirectives);
+            } else {
+                // Datos iniciales con categorías
+                directives = [
+                    // Modo Cognitivo
+                    { text: '[MODE: DEEP_FOCUS]', category: 'Modo Cognitivo' },
+                    { text: '[MODE: QUICK_INJECT]', category: 'Modo Cognitivo' },
+                    { text: '[MODE: LIGHT_CONNECT]', category: 'Modo Cognitivo' },
+                    { text: '[SET_ACTIVE_SYMBOL]', category: 'Modo Cognitivo' },
+                    { text: '[SET_RELEVANT_CONTEXT]', category: 'Modo Cognitivo' },
+                    // Control de Ejecución
+                    { text: '[ENFORCE: GIT_BLOCK]', category: 'Control de Ejecución' },
+                    { text: '[ENFORCE: NO_TOOL_CALL]', category: 'Control de Ejecución' },
+                    { text: '[ENFORCE: TOOL_CALL]', category: 'Control de Ejecución' },
+                    { text: '[AWAIT_USER_FEEDBACK]', category: 'Control de Ejecución' },
+                    { text: '[AWAIT_USER_APPROVAL]', category: 'Control de Ejecución' },
+                    // Formato de Salida
+                    { text: '[INFO: SKE]', category: 'Formato de Salida' },
+                    { text: '[INFO: HPS]', category: 'Formato de Salida' },
+                    { text: '[INFO: CAVEAT]', category: 'Formato de Salida' },
+                    { text: '[OUTPUT: SPANISH]', category: 'Formato de Salida' },
+                    { text: '[OUTPUT: ENGLISH]', category: 'Formato de Salida' }
+                ];
+                saveDirectives();
+            }
+            renderDirectives();
+        }
+
+        function saveDirectives() {
+            localStorage.setItem('vyvia_directives', JSON.stringify(directives));
+        }
+
+        function renderDirectives() {
+            directivesList.innerHTML = '';
+            const groupedDirectives = directives.reduce((acc, directive) => {
+                acc[directive.category] = acc[directive.category] || [];
+                acc[directive.category].push(directive);
+                return acc;
+            }, {});
+
+            for (const category in groupedDirectives) {
+                const categoryHeader = document.createElement('h3');
+                categoryHeader.textContent = category;
+                categoryHeader.style.color = 'var(--primary-color)';
+                categoryHeader.style.marginTop = '20px';
+                directivesList.appendChild(categoryHeader);
+
+                const categoryContainer = document.createElement('div');
+                groupedDirectives[category].forEach((directive, index) => {
+                    const directiveItem = document.createElement('div');
+                    directiveItem.className = 'project-list-item'; // Reutilizamos estilo
+                    directiveItem.textContent = directive.text;
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-project-btn'; // Reutilizamos estilo
+                    deleteBtn.innerHTML = '&times;';
+                    deleteBtn.onclick = () => {
+                        // Encontrar el índice original para eliminar
+                        const originalIndex = directives.findIndex(d => d.text === directive.text && d.category === directive.category);
+                        if (originalIndex > -1) {
+                            directives.splice(originalIndex, 1);
+                            saveDirectives();
+                            renderDirectives();
+                        }
+                    };
+                    directiveItem.appendChild(deleteBtn);
+                    categoryContainer.appendChild(directiveItem);
+                });
+                directivesList.appendChild(categoryContainer);
+            }
+        }
+
+        // --- FIN LÓGICA GESTIÓN DE DIRECTIVAS v2.1 ---
         function loadProjects() {
             const storedProjects = localStorage.getItem('vyvia_projects');
             if (storedProjects) {
@@ -166,11 +268,30 @@
                 saveProjects();
             }
             renderProjects();
+            loadDirectives(); // Cargar directivas al inicio
         }
 
         function saveProjects() {
             localStorage.setItem('vyvia_projects', JSON.stringify(projects));
         }
+
+
+        manageDirectivesBtn.addEventListener('click', () => {
+            directivesModal.style.display = 'flex';
+            renderDirectives();
+        });
+        directivesModalCloseBtn.addEventListener('click', () => directivesModal.style.display = 'none');
+        addDirectiveBtn.addEventListener('click', () => {
+            const text = newDirectiveTextInput.value.trim();
+            const category = newDirectiveCategoryInput.value.trim();
+            if (text && category) {
+                directives.push({ text, category });
+                saveDirectives();
+                renderDirectives();
+                newDirectiveTextInput.value = '';
+                newDirectiveCategoryInput.value = '';
+            }
+        });
 
         function renderProjects() {
             // Limpiar listas
