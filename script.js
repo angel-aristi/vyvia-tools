@@ -21,6 +21,13 @@ let directives = [];
 let activeDirectives = [];
 let categories = [];
 
+const manageCategoriesBtn = document.getElementById('manage-categories-btn'); 
+ const categoriesModal = document.getElementById('categories-modal'); 
+ const categoriesModalCloseBtn = document.getElementById('categories-modal-close-btn'); 
+ const categoryList = document.getElementById('category-list'); 
+ const newCategoryInputModal = document.getElementById('new-category-input-modal'); 
+ const addCategoryBtnModal = document.getElementById('add-category-btn-modal');
+
 function renderActiveDirectives() {
     const displayContainer = document.getElementById('active-directives-display');
     displayContainer.innerHTML = '';
@@ -281,7 +288,6 @@ copyNoteButton.addEventListener('click', () => {
     }).catch(err => alert('Hubo un error al intentar copiar la nota.'));
 });
 
-const manageCategoriesBtn = document.getElementById('manage-categories-btn');
 function loadCategories() {
     const storedCategories = localStorage.getItem('vyvia_directive_categories');
     if (storedCategories) {
@@ -295,12 +301,50 @@ function loadCategories() {
 
 function saveCategories() { localStorage.setItem('vyvia_directive_categories', JSON.stringify(categories)); }
 
-manageCategoriesBtn.addEventListener('click', () => {
-    const newCategoryList = prompt('Gestionar categorías (separadas por coma):', categories.join(', '));
-    if (newCategoryList !== null) {
-        categories = newCategoryList.split(',').map(c => c.trim()).filter(Boolean);
-        saveCategories();
-        renderCategorySelector();
-        renderDirectives();
-    }
-});
+function renderCategories() { 
+     categoryList.innerHTML = ''; 
+     categories.forEach((category, index) => { 
+         const listItem = document.createElement('li'); 
+         listItem.className = 'project-list-item'; 
+         listItem.textContent = category; 
+          
+         const deleteBtn = document.createElement('button'); 
+         deleteBtn.className = 'delete-project-btn'; 
+         deleteBtn.innerHTML = '×'; 
+         deleteBtn.onclick = () => { 
+             categories.splice(index, 1); 
+             saveCategories(); 
+             renderCategories(); 
+             renderCategorySelector(); // Actualizar el dropdown 
+         }; 
+         listItem.appendChild(deleteBtn); 
+         categoryList.appendChild(listItem); 
+     }); 
+ } 
+
+ function addNewCategory() { 
+     const newCategoryName = newCategoryInputModal.value.trim(); 
+     if (newCategoryName && !categories.includes(newCategoryName)) { 
+         categories.push(newCategoryName); 
+         saveCategories(); 
+         renderCategories(); 
+         renderCategorySelector(); // Actualizar el dropdown 
+         newCategoryInputModal.value = ''; 
+     } 
+ } 
+
+manageCategoriesBtn.addEventListener('click', () => { 
+     categoriesModal.style.display = 'flex'; 
+     renderCategories(); 
+ }); 
+
+categoriesModalCloseBtn.addEventListener('click', () => { categoriesModal.style.display = 'none'; }); 
+ addCategoryBtnModal.addEventListener('click', addNewCategory); 
+ newCategoryInputModal.addEventListener('keypress', (e) => { 
+     if (e.key === 'Enter') addNewCategory(); 
+ }); 
+ window.addEventListener('click', (event) => { 
+     if (event.target === categoriesModal) { 
+         categoriesModal.style.display = 'none'; 
+     } 
+ });
