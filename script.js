@@ -263,12 +263,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    function getFormattedLocalDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
     // --- 5. Event Listeners Setup ---
     function setupEventListeners() {
         elements.copyButton.addEventListener('click', () => {
             const message = elements.messageInput.value;
             if (!message) return;
-            const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+            const timestamp = getFormattedLocalDate();
             const header = `${elements.chatSessionInput.value || 'C?'} | [PROYECTO: ${elements.projectSelector.value}] | ${timestamp}`;
             const directiveLine = activeDirectives.join(' ');
             const fullMessage = directiveLine ? `${header}\n${directiveLine}\n\n${message}` : `${header}\n\n${message}`;
@@ -326,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Quick Notes
         elements.copyNoteButton.addEventListener('click', () => {
             if (!elements.notesInput.value) return;
-            const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+            const timestamp = getFormattedLocalDate();
             const fullNote = `[NOTA RÁPIDA | ${timestamp}]\n${elements.notesInput.value}`;
             navigator.clipboard.writeText(fullNote).then(() => {
                 showFeedback(elements.copyNoteButton, '¡Nota Copiada!');
